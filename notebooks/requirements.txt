@@ -1,4 +1,0 @@
-# Notebook-specific optional dependencies
-jupyter>=1.0
-ipykernel>=6.29
-nbconvert>=7.16
