@@ -213,6 +213,8 @@ def configure_obs(args: argparse.Namespace) -> None:
 def run(args: argparse.Namespace) -> None:
     configure_obs(args)
 
+    print("⚫ Streaming coalesce: sensor → agg(coalesce) → sink")
+
     # Build and register graph
     graph = build_graph(args)
 

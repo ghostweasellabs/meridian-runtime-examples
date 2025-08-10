@@ -22,7 +22,10 @@ def discover_example_entrypoints() -> list[Path]:
 
 def run_entrypoint(path: Path) -> None:
     print(f"[examples] running: {path}")
-    proc = subprocess.run([sys.executable, str(path)], capture_output=True, text=True)
+    # Run as module from project root to maintain package context
+    module_path = str(path.relative_to(ROOT)).replace('/', '.').replace('.py', '')
+    proc = subprocess.run([sys.executable, "-m", module_path], 
+                         cwd=ROOT, capture_output=True, text=True)
     if proc.returncode != 0:
         print(proc.stdout)
         print(proc.stderr, file=sys.stderr)

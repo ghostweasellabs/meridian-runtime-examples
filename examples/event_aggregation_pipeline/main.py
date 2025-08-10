@@ -9,6 +9,7 @@ from meridian.nodes import DataProducer, EventAggregator, MapTransformer
 
 
 def build_graph() -> Subgraph:
+    """Event aggregation demo: sum small integers over a moving window."""
     # Producer emits random small ints
     def gen():
         for _ in range(30):
@@ -26,11 +27,16 @@ def build_graph() -> Subgraph:
 
 
 def main() -> None:
+    print("⚫ Event aggregation (50ms window):")
+    print("   p → agg(window) → sink")
     g = build_graph()
-    s = Scheduler(SchedulerConfig(idle_sleep_ms=0, tick_interval_ms=5))
+    s = Scheduler(SchedulerConfig(idle_sleep_ms=0, tick_interval_ms=5, shutdown_timeout_s=4.0))
     s.register(g)
     th = threading.Thread(target=s.run, daemon=True)
-    th.start(); time.sleep(0.3); s.shutdown(); th.join()
+    th.start()
+    time.sleep(0.3)
+    s.shutdown(); th.join()
+    print("✓ Aggregation demo finished.")
 
 
 if __name__ == "__main__":

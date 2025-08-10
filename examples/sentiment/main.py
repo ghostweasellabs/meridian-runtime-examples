@@ -269,6 +269,8 @@ def configure_obs(args: argparse.Namespace) -> None:
 def run(args: argparse.Namespace) -> None:
     configure_obs(args)
 
+    print("⚫ Sentiment: ingest → tokenize → score → sink  (control: avg/binary/flush/quiet/verbose)")
+
     sched = Scheduler(
         SchedulerConfig(
             tick_interval_ms=args.tick_ms,

@@ -9,10 +9,11 @@ from meridian.nodes import AsyncWorker, DataProducer, MapTransformer
 
 
 def build_graph() -> Subgraph:
+    """Async worker demo: run a small async function with limited concurrency."""
     # Producer emits integers 0..9
     p = DataProducer("p", data_source=lambda: iter(range(10)), interval_ms=0)
 
-    # Async worker doubles after small delay (out-of-order completes)
+    # Async worker doubles after a small delay (out-of-order completes)
     async def fn(x: int) -> int:
         await asyncio.sleep(0.01 * (x % 3))
         return x * 2
@@ -28,11 +29,13 @@ def build_graph() -> Subgraph:
 
 
 def main() -> None:
+    print("⚫ Async worker: producer → async‑worker(×3) → sink")
     g = build_graph()
-    s = Scheduler(SchedulerConfig(idle_sleep_ms=0, tick_interval_ms=1))
+    s = Scheduler(SchedulerConfig(idle_sleep_ms=0, tick_interval_ms=1, shutdown_timeout_s=4.0))
     s.register(g)
     th = threading.Thread(target=s.run, daemon=True)
     th.start(); time.sleep(0.5); s.shutdown(); th.join()
+    print("✓ Async demo finished.")
 
 
 if __name__ == "__main__":

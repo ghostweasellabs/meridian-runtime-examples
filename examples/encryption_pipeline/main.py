@@ -15,6 +15,7 @@ from meridian.nodes import (
 
 
 def build_graph() -> Subgraph:
+    """Encryption demo: JSON → encrypt → decrypt → JSON again (AES-256-GCM)."""
     # Producer emits one dict
     p = DataProducer("p", data_source=lambda: iter([{ "hello": "world" }]), interval_ms=0)
     key = b"0" * 32
@@ -30,11 +31,14 @@ def build_graph() -> Subgraph:
 
 
 def main() -> None:
+    print("⚫ Encryption pipeline (AES‑256‑GCM):")
+    print("   p(JSON) → enc → dec → decode(JSON)")
     g = build_graph()
-    s = Scheduler(SchedulerConfig(idle_sleep_ms=0, tick_interval_ms=5))
+    s = Scheduler(SchedulerConfig(idle_sleep_ms=0, tick_interval_ms=5, shutdown_timeout_s=4.0))
     s.register(g)
     th = threading.Thread(target=s.run, daemon=True)
     th.start(); time.sleep(0.2); s.shutdown(); th.join()
+    print("✓ Encryption demo finished.")
 
 
 if __name__ == "__main__":

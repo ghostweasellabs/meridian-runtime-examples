@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Meridian Runtime – Simple Web Server</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    :root { color-scheme: light dark; }
+    /* shadcn-like neutral palette (zinc/stone) */
+    body { background: #fafafa; color: #0a0a0a; }
+    .container { max-width: 46rem; margin-inline: auto; padding: 1.25rem; }
+    .card { border-radius: 0.75rem; border: 1px solid #e4e4e7; background: #ffffff; box-shadow: 0 1px 2px rgba(0,0,0,0.04); }
+    .muted { color: #52525b; }
+    .btn { display:inline-flex; align-items:center; gap:0.5rem; border-radius:0.5rem; border:1px solid #e4e4e7; padding:0.5rem 1rem; font-size:0.875rem; font-weight:500; color:#0a0a0a; text-decoration:none; background:#fff; }
+    .btn:hover { background:#f4f4f5; }
+    .badge { display:inline-flex; align-items:center; border-radius:9999px; background:#e4e4e7; color:#18181b; padding:0.125rem 0.625rem; font-size:0.75rem; }
+    .kicker { color:#3f3f46; font-weight:600; letter-spacing:.08em; text-transform:uppercase; font-size:.75rem; }
+    .list { color:#3f3f46; }
+    .footer { text-align:center; color:#71717a; }
+
+    /* Diagram styling */
+    .diagram-wrapper { display:block; margin-inline:auto; }
+    .diagram { max-width: 100%; height: auto; display:block; margin-inline:auto; }
+
+    @media (prefers-color-scheme: dark) {
+      body { background:#0a0a0a; color:#fafafa; }
+      .card { background:#0a0a0a; border-color:#27272a; color:#e5e5e5; }
+      .muted { color:#a1a1aa; }
+      .btn { color:#e5e5e5; border-color:#27272a; background:#0a0a0a; }
+      .btn:hover { background:#18181b; }
+      .badge { background:#27272a; color:#fafafa; }
+      .kicker { color:#a1a1aa; }
+      .list { color:#d4d4d8; }
+      .footer { color:#a1a1aa; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header class="flex items-center justify-between mb-6">
+      <h1 class="text-2xl font-semibold tracking-tight">Meridian Runtime</h1>
+      <span class="badge">Demo</span>
+    </header>
+
+    <section class="card p-6 mb-6">
+      <div class="kicker mb-1">FastAPI ingress → Meridian graph</div>
+      <h2 class="text-xl font-medium mb-2">Simple Web Server</h2>
+      <p class="muted mb-4">
+        FastAPI takes the HTTP request. We hand it off to a tiny graph that runs a few clear steps
+        (route → handle → merge → reply). That makes it easier to stay responsive during spikes,
+        choose how to behave under pressure, and actually see what’s going on.
+      </p>
+      <div class="flex flex-wrap gap-3">
+        <a class="btn" href="/echo?msg=Hello%20Meridian">Try Echo</a>
+        <a class="btn" href="/metrics">View Metrics</a>
+        <a class="btn" href="https://github.com/ghostweasellabs/meridian-runtime" target="_blank" rel="noreferrer">Learn More</a>
+      </div>
+    </section>
+
+    <section class="card p-6 mb-6">
+      <h3 class="text-lg font-medium mb-3">Visual dataflow</h3>
+      <div class="diagram-wrapper">
+        <svg class="diagram" viewBox="0 0 1260 300" role="img" aria-label="Dataflow diagram" preserveAspectRatio="xMidYMid meet">
+          <defs>
+            <pattern id="grid" width="24" height="24" patternUnits="userSpaceOnUse">
+              <path d="M 24 0 L 0 0 0 24" fill="none" stroke="#efeff1" stroke-opacity="0.25" stroke-width="1" />
+            </pattern>
+            <filter id="shadow" x="-15%" y="-15%" width="130%" height="130%">
+              <feDropShadow dx="0" dy="1" stdDeviation="1" flood-color="#000" flood-opacity="0.06" />
+            </filter>
+            <marker id="arrow" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto">
+              <polygon points="0 0, 10 4, 0 8" fill="#a1a1aa" />
+            </marker>
+            <g id="tpl-node" filter="url(#shadow)">
+              <rect width="170" height="56" rx="12" fill="#fff" stroke="#e4e4e7" />
+            </g>
+          </defs>
+
+          <rect x="0" y="0" width="1260" height="300" fill="url(#grid)"/>
+
+          <!-- Left row: FastAPI -> Bridge -> Router -->
+          <g transform="translate(60,122)"><use href="#tpl-node" /><text x="85" y="34" text-anchor="middle" font-weight="600" fill="#18181b">FastAPI</text></g>
+          <g transform="translate(260,122)"><use href="#tpl-node" /><text x="85" y="34" text-anchor="middle" fill="#18181b">Bridge (Queue)</text></g>
+          <g transform="translate(460,122)"><use href="#tpl-node" /><text x="85" y="34" text-anchor="middle" fill="#18181b">Router</text></g>
+
+          <!-- Right column: Echo / Not Found -->
+          <g transform="translate(670,60)"><use href="#tpl-node" /><text x="85" y="34" text-anchor="middle" fill="#18181b">Echo</text></g>
+          <g transform="translate(670,190)"><use href="#tpl-node" /><text x="85" y="34" text-anchor="middle" fill="#18181b">Not Found</text></g>
+
+          <!-- Merger and Response (labeled) -->
+          <g transform="translate(870,122)"><use href="#tpl-node" /><text x="85" y="34" text-anchor="middle" fill="#18181b">Merger</text></g>
+          <g transform="translate(1080,122)"><use href="#tpl-node" /><text x="85" y="34" text-anchor="middle" fill="#18181b">Response</text></g>
+
+          <!-- Edges -->
+          <path d="M 230 150 C 244 150, 250 150, 260 150" fill="none" stroke="#a1a1aa" stroke-width="1.6" marker-end="url(#arrow)" />
+          <path d="M 430 150 C 444 150, 450 150, 460 150" fill="none" stroke="#a1a1aa" stroke-width="1.6" marker-end="url(#arrow)" />
+
+          <!-- Router split to Echo/Not Found -->
+          <path d="M 630 150 C 650 120, 655 110, 670 106" fill="none" stroke="#a1a1aa" stroke-width="1.6" marker-end="url(#arrow)" />
+          <path d="M 630 150 C 650 180, 655 190, 670 196" fill="none" stroke="#a1a1aa" stroke-width="1.6" marker-end="url(#arrow)" />
+
+          <!-- Echo/Not Found to Merger -->
+          <path d="M 840 88 C 860 120, 865 130, 870 150" fill="none" stroke="#a1a1aa" stroke-width="1.6" marker-end="url(#arrow)" />
+          <path d="M 840 218 C 860 185, 865 170, 870 150" fill="none" stroke="#a1a1aa" stroke-width="1.6" marker-end="url(#arrow)" />
+
+          <!-- Merger to Response -->
+          <path d="M 1040 150 C 1055 150, 1065 150, 1080 150" fill="none" stroke="#a1a1aa" stroke-width="1.6" marker-end="url(#arrow)" />
+        </svg>
+      </div>
+      <p class="muted mt-2">Legend: Merger = combine the two routes before replying. Lines are small queues so bursts can’t blow up memory.</p>
+      <p class="muted mt-3">The scheduler gives each step a fair turn so the service stays steady even when traffic is uneven.</p>
+    </section>
+
+    <section class="card p-6 mb-6">
+      <h3 class="text-lg font-medium mb-2">Why run the graph behind HTTP?</h3>
+      <ul class="list-disc ml-5 space-y-1 list">
+        <li><strong>Stays calm under spikes</strong>: we put tiny buffers between steps so load smooths out instead of snowballing.</li>
+        <li><strong>You pick the trade‑off</strong>: keep everything (wait), keep it fresh (replace), drop on purpose, or merge bursts.</li>
+        <li><strong>Ops knobs you’ll actually use</strong>: send a control message to flush, quiet noisy logs, or drain and shut down.</li>
+        <li><strong>Real visibility</strong>: counters for queue depth/drops, simple logs you can grep, optional tracing if you want it.</li>
+        <li><strong>Plays well with others</strong>: the same graph can sit behind HTTP today and an MQ or stream tomorrow.</li>
+        <li><strong>Safer changes</strong>: each step is small and testable; swapping one handler doesn’t tangle the rest.</li>
+      </ul>
+      <p class="muted mt-3">If it’s plain CRUD, keep it simple with FastAPI. When bursts and pipelines show up, flip on the graph.</p>
+    </section>
+
+    <footer class="footer mt-8 text-sm">
+      Built with <strong>FastAPI</strong> + <strong>Meridian Runtime</strong> — typed nodes, bounded edges, fairness, and observability.
+    </footer>
+  </div>
+</body>
+</html>
